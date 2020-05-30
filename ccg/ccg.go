@@ -1,23 +1,23 @@
 package ccg
 
 import (
-	"fmt"
 	"net/http"
 )
 
-type HandlerFunc func(http.ResponseWriter, *http.Request)
+// 框架入口
+type HandlerFunc func(*Context)
 
 type Engine struct {
-	router map[string]HandlerFunc
+	//router map[string]HandlerFunc
+	router *router
 }
 
 func New() *Engine {
-	return &Engine{router: make(map[string]HandlerFunc)}
+	return &Engine{router: newRouter()}
 }
 
 func (e *Engine) addRoute(method string, pattern string, handler HandlerFunc) {
-	key := method + "_" + pattern
-	e.router[key] = handler
+	e.router.addRouter(method, pattern, handler)
 }
 
 func (e *Engine) GET(pattern string, handler HandlerFunc) {
@@ -29,12 +29,14 @@ func (e *Engine) POST(pattern string, handler HandlerFunc) {
 }
 
 func (e *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	key := req.Method + "_" + req.URL.Path
-	if handler, ok := e.router[key]; ok {
-		handler(w, req)
-	} else {
-		fmt.Fprintf(w, "404 Not Found: %s\n", req.URL)
-	}
+	//key := req.Method + "_" + req.URL.Path
+	//if handler, ok := e.router[key]; ok {
+	//	handler(w, req)
+	//} else {
+	//	fmt.Fprintf(w, "404 Not Found: %s\n", req.URL)
+	//}
+	c := newContext(w, req)
+	e.router.handle(c)
 }
 
 // handle 接口需要实现serveHTTP方法，不然就报错

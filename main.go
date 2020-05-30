@@ -2,13 +2,16 @@ package main
 
 import (
 	"ccg/ccg"
-	"fmt"
 	"net/http"
 )
 
 func main() {
 	r := ccg.New()
-	r.GET("/", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "URL.Path = %q\n", req.URL.Path)
+	r.GET("/", func(c *ccg.Context) {
+		c.JSON(http.StatusOK, ccg.H{
+			"test": c.PostForm("test"),
+			"aaa":  c.PostForm("aaa"),
+		})
 	})
+	r.Run(":9999")
 }
